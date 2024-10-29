@@ -75,7 +75,10 @@ function App() {
         const filteredGames = data.filter(
           (game) =>
             game.status === "ongoing" &&
-            (game.player1 == null || game.player2 == null)
+            (game.player1 === null ||
+              game.player2 === null ||
+              game.player1 === playerName ||
+              game.player2 === playerName)
         );
         setGames(filteredGames);
       } else {
@@ -230,6 +233,14 @@ function App() {
       console.error("Error deleting game:", error.message);
     }
   };
+  // const [games, setGames] = useSta
+  const quitCurrentSession = async () => {
+    setSelectedGameId(null);
+    setSelectedGameName("");
+    setBoard(Array(9).fill(null));
+    setIsPlayerTurn(false);
+    setWinner(null);
+  };
 
   return (
     <div className="App">
@@ -269,7 +280,7 @@ function App() {
                       <button
                         onClick={() => joinGame(game.game_name, game.game_id)}
                       >
-                        {game.game_name}
+                        Game {game.game_id}
                       </button>
                       <button onClick={() => deleteGame(game.game_id)}>
                         Delete
@@ -278,8 +289,13 @@ function App() {
                   ))
                 )}
               </ul>
-              <button className="joinButton">Join</button>
             </>
+          )}
+
+          {playerId && selectedGameName && (
+            <button className="joinButton" onClick={() => quitCurrentSession()}>
+              Quit current session
+            </button>
           )}
         </div>
         <div className="mainbar">

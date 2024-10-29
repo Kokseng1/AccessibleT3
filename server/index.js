@@ -166,7 +166,12 @@ app.post("/api/games/:id/join", (req, res) => {
         return res.status(404).json({ error: "Game not found" });
       }
       if (game.status === "ongoing") {
-        if (!game.player1) {
+        if (game.player2 === playerName || game.player1 === playerName) {
+          var currPlayer = game.player2 == playerName ? "player2" : "player1";
+          return res.json({
+            player: currPlayer,
+          });
+        } else if (!game.player1) {
           db.run(
             "UPDATE Games SET player1 = ? WHERE game_id = ?",
             [playerName, gameId],
