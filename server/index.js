@@ -33,6 +33,23 @@ app.get("/api/games", (req, res) => {
   });
 });
 
+app.post("/api/players", (req, res) => {
+  const { playerName } = req.body;
+
+  db.run(
+    `INSERT INTO Players (player_name) VALUES (?)`,
+    [playerName],
+    function (err) {
+      if (err) {
+        return res
+          .status(400)
+          .json({ message: "Error adding player: " + err.message });
+      }
+      res.status(201).json({ playerId: this.lastID, playerName });
+    }
+  );
+});
+
 app.get("/api/games/:id", (req, res) => {
   const { id } = req.params;
 

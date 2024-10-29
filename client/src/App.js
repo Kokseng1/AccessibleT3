@@ -4,30 +4,44 @@ import React, { useEffect, useState } from "react";
 function App() {
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
+  const [playerName, setPlayerName] = useState("");
+  const [playerId, setPlayerId] = useState(localStorage.getItem("playerId"));
+
   const getPlayerId = () => {
-    const storedId = localStorage.getItem("playerId");
-    if (storedId) {
-      return storedId;
-    } else {
-      const newId = generatePlayerId();
-      localStorage.setItem("playerId", newId);
-      return newId;
+    if (playerId) {
+      return playerId;
     }
+    return null;
   };
 
-  const generatePlayerId = () => {
-    console.log("generating new player Id");
-    const existingIds = JSON.parse(sessionStorage.getItem("playerIds")) || [];
-    let playerId = 0;
-    while (existingIds.includes(playerId)) {
-      playerId++;
-    }
-
-    existingIds.push(playerId);
-    sessionStorage.setItem("playerIds", JSON.stringify(existingIds));
-    return playerId;
+  const handlePlayerNameChange = (event) => {
+    setPlayerName(event.target.value);
   };
 
+  const savePlayerName = async () => {
+    if (!playerName) return;
+
+    try {
+      const response = await fetch("http://localhost:8800/api/players", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ playerName }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("playerId", data.playerId);
+        setPlayerId(data.playerId);
+        console.log("Player added:", data.playerName);
+      } else {
+        console.error("Failed to save player name:", data);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
   const fetchGames = async () => {
     try {
       const response = await fetch("http://localhost:8800/api/games");
@@ -107,6 +121,13 @@ function App() {
         <h1>Inclusive tic tac toe</h1>
         <div class="container">
           <div class="sidebar">
+            <input
+              type="text"
+              value={playerName}
+              onChange={handlePlayerNameChange}
+              placeholder="Enter your name"
+            />
+            <button onClick={savePlayerName}>Save Name</button>
             <button class="connectButton">Connect</button>
             <button className="createButton" onClick={createGame}>
               Create
