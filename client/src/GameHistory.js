@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
+import AccessibleAlert from "./AccessibleAlert";
 
 const GameHistory = () => {
+  const [alertMessage, setAlertMessage] = useState("");
   const [games, setGames] = useState([]);
+  const [confimationMsg, setConfirmationMsg] = useState("");
+
+  const handleConfirmationChange = (event) => {
+    setConfirmationMsg(event.target.value);
+  };
 
   useEffect(() => {
     const fetchGameHistory = async () => {
@@ -25,10 +32,12 @@ const GameHistory = () => {
   }, []);
 
   const clearHistory = async () => {
-    const confirmClear = window.confirm(
-      "Are you sure you want to clear the game history?"
-    );
-    if (confirmClear) {
+    if (confimationMsg.toLowerCase() != "confirm clear") {
+      console.log("clearing");
+      setAlertMessage(
+        "Wrong confirmation message! Type 'confirm clear' in to clear game history"
+      );
+    } else {
       try {
         const response = await fetch("http://localhost:8800/api/gamesclear", {
           method: "DELETE",
@@ -38,45 +47,62 @@ const GameHistory = () => {
       } catch (error) {
         console.error("Error clearing game history:", error);
       }
+      setAlertMessage("Game history cleared");
     }
   };
 
   return (
     <div>
-      <h1>Game History</h1>
-      <button onClick={clearHistory}>Clear Game History</button>
+      <h1 id="history-title">Game History Table</h1>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          clearHistory();
+        }}
+      >
+        <input
+          type="text"
+          value={confimationMsg}
+          onChange={handleConfirmationChange}
+          placeholder="Type 'confirm clear' in to clear game history and hit enter"
+        />
+      </form>
+
       {games.length === 0 ? (
         <p>No games found.</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Game ID</th>
-              <th>Player 1</th>
-              <th>Player 2</th>
-              <th>Winner</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {games.map((game) => (
-              <tr key={game.game_id}>
-                <td>{game.game_id}</td>
-                <td>{game.player1}</td>
-                <td>{game.player2}</td>
-                <td>
-                  {game.winner
-                    ? game.winner
-                    : game.status === "ended"
-                    ? "Tie"
-                    : "Ongoing"}
-                </td>
-                <td>{new Date(game.created_at).toLocaleString()}</td>
+        <div role="region" aria-labelledby="history-title">
+          <table className="gameHistoryTable">
+            <thead>
+              <tr>
+                <th scope="col">Game ID</th>
+                <th>Player 1</th>
+                <th>Player 2</th>
+                <th>Winner</th>
+                <th>Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {games.map((game) => (
+                <tr key={game.game_id} tabIndex="0">
+                  <td>{game.game_id}</td>
+                  <td>{game.player1}</td>
+                  <td>{game.player2}</td>
+                  <td>
+                    {game.winner
+                      ? game.winner
+                      : game.status === "ended"
+                      ? "Tie"
+                      : "Ongoing"}
+                  </td>
+                  <td>{new Date(game.created_at).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+      <AccessibleAlert message={alertMessage} />
     </div>
   );
 };
