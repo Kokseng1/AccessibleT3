@@ -23,6 +23,24 @@ app.post("/api/games", (req, res) => {
   });
 });
 
+app.delete("/api/games/:id", (req, res) => {
+  const { id } = req.params;
+
+  const query = `DELETE FROM Games WHERE game_id = ?`;
+  db.run(query, [id], function (err) {
+    if (err) {
+      console.error("Error deleting game:", err.message);
+      return res.status(500).json({ error: "Failed to delete game" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    res.status(204).send();
+  });
+});
+
 app.get("/api/games", (req, res) => {
   db.all("SELECT * FROM games", [], (err, rows) => {
     if (err) {
@@ -66,16 +84,22 @@ app.get("/api/games/:id", (req, res) => {
   });
 });
 
-// update game move
-app.put("/api/game/:id", (req, res) => {
+app.post("/api/moves", (req, res) => {
+  const { gameId, player, position } = req.body;
+
   db.run(
-    `UPDATE games SET board_state = ?, status = ? WHERE id = ?`,
-    [req.body.board_state, req.body.status, req.params.id],
+    `INSERT INTO Moves (game_id, player, position) VALUES (?, ?, ?)`,
+    [gameId, player, position],
     function (err) {
       if (err) {
-        return res.status(500).send(err.message);
+        console.error("Error saving move:", err.message);
+        res.status(500).json({ error: "Failed to save move" });
+      } else {
+        console.log(
+          `Move recorded for Game ID: ${gameId}, Position: ${position}, Player: ${player}`
+        );
+        res.status(200).json({ message: "Move saved successfully" });
       }
-      res.send({ changes: this.changes });
     }
   );
 });
@@ -83,8 +107,69 @@ app.put("/api/game/:id", (req, res) => {
 app.post("/api/games/:id/join", (req, res) => {
   const gameId = req.params.id;
   const playerId = req.body.playerId; // Adjust as necessary for your logic
-  console.log("in server game" + gameId + playerId);
+  console.log("player " + playerId + " joined server game " + gameId);
 
-  // Logic to join the game using gameId and playerId
-  // Respond with appropriate message
+  db.get(
+    "SELECT player1, player2, status FROM Games WHERE game_id = ?",
+    [gameId],
+    (err, game) => {
+      if (err) {
+        console.error("Error fetching game:", err.message);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+
+      if (!game) {
+        return res.status(404).json({ error: "Game not found" });
+      }
+      if (game.status === "ongoing") {
+        if (!game.player1) {
+          db.run(
+            "UPDATE Games SET player1 = ? WHERE game_id = ?",
+            [playerId, gameId],
+            function (err) {
+              if (err) {
+                console.error("Error assigning player1:", err.message);
+                return res.status(500).json({ error: "Internal Server Error" });
+              }
+              return res.json({
+                player: "player1",
+              });
+            }
+          );
+        } else if (!game.player2) {
+          db.run(
+            "UPDATE Games SET player2 = ? WHERE game_id = ?",
+            [playerId, gameId],
+            function (err) {
+              if (err) {
+                console.error("Error assigning player2:", err.message);
+                return res.status(500).json({ error: "Internal Server Error" });
+              }
+              return res.json({
+                player: "player2",
+              });
+            }
+          );
+        } else {
+          return res.status(400).json({ error: "Game full" });
+        }
+      } else {
+        return res.status(400).json({ error: "Game is not ongoing" });
+      }
+    }
+  );
+});
+
+// Fetch all moves for a specific game
+app.get("/api/games/:id/moves", (req, res) => {
+  const gameId = req.params.id;
+  //   console.log(gameId);
+  db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, position) => {
+    if (err) {
+      console.error("Error fetching moves:", err.message);
+      return res.status(500).json({ error: "Failed to fetch moves" });
+    }
+    // console.log(position);
+    res.json(position);
+  });
 });

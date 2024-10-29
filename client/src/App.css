@@ -66,11 +66,22 @@ h1::after {
   top: 50px;
 }
 
+li {
+  display: flex; /* Use flexbox for layout */
+  justify-content: space-between; /* Space between items */
+  align-items: center; /* Center items vertically */
+  margin-bottom: 8px; /* Add some space between list items */
+}
+
+button {
+  margin-left: 10px; /* Add space between game name and delete button */
+}
+
 .container {
   border: 2px solid black;
   width: 60vw;
   height: 70vh;
-  top: 23vh;
+  top: 34vh;
   left: 20vw;
   position: absolute;
   display: grid;
@@ -142,7 +153,7 @@ li {
   border-left: none;
 }
 
-.board.circle .cell:not(.cross):not(.circle):hover::after,
+/* .board.circle .cell:not(.cross):not(.circle):hover::after,
 .cell.circle::after {
   content: "";
   background-color: #c9c0a5;
@@ -184,4 +195,4 @@ li {
 .cell.circle,
 .cell.cross {
   cursor: not-allowed;
-}
+} */
