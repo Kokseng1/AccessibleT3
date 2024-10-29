@@ -6,7 +6,7 @@ function App() {
   const [selectedGameName, setSelectedGameName] = useState(null);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [playerName, setPlayerName] = useState("");
-  const [playerId, setPlayerId] = useState(localStorage.getItem("playerId"));
+  const [playerId, setPlayerId] = useState(null);
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isPlayerOne, setIsPlayerOne] = useState(true); // true ==Player 1, false == Player 2
   const [winner, setWinner] = useState(null);
@@ -16,6 +16,7 @@ function App() {
   const [isPlayerTurn, setIsPlayerTurn] = useState(null);
 
   const checkWinner = (currentBoard) => {
+    // console.log("in check winner");
     const winningCombinations = [
       [0, 1, 2],
       [3, 4, 5],
@@ -34,9 +35,11 @@ function App() {
         currentBoard[a] === currentBoard[b] &&
         currentBoard[a] === currentBoard[c]
       ) {
+        // console.log("winner " + currentBoard[a]);
         return currentBoard[a];
       }
     }
+    // console.log("no winner in check winner");
     return null;
   };
 
@@ -120,27 +123,47 @@ function App() {
 
   useEffect(() => {
     const updateFetches = async () => {
-      // Fetch games and board state
       await fetchGames();
       await fetchBoardState();
     };
 
-    updateFetches(); // Initial fetch
+    updateFetches();
 
-    const intervalId = setInterval(updateFetches, 1000); // Fetch every second
+    const intervalId = setInterval(updateFetches, 1000);
 
-    return () => clearInterval(intervalId); // Cleanup on unmount
-  }, [selectedGameId]); // Add selectedGameId to dependencies if necessary
+    return () => clearInterval(intervalId);
+  }, [selectedGameId]);
 
   const handleClick = async (index) => {
-    if (board[index] || winner || !isPlayerTurn) return; // Ignore click if cell is filled, game has ended, or not player turn
+    if (board[index] || winner || !isPlayerTurn) return;
 
     const playerSymbol = isPlayerOne ? "O" : "X";
     const newBoard = [...board];
-
+    newBoard[index] = playerSymbol;
     const gameWinner = checkWinner(newBoard);
     if (gameWinner) {
-      setWinner(gameWinner);
+      setWinner(playerName);
+      try {
+        const response = await fetch(
+          `http://localhost:8800/api/games/${selectedGameId}/winner`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ winner: playerName }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to record winner: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Winner recorded:", data);
+      } catch (error) {
+        console.error("Error recording winner:", error.message);
+      }
     }
 
     // Record move in database
@@ -198,7 +221,7 @@ function App() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ playerId: playerId }),
+          body: JSON.stringify({ playerName: playerName }),
         }
       );
 
@@ -245,15 +268,19 @@ function App() {
       {winner && <h2>Winner: {winner}</h2>}
       <div className="container">
         <div className="sidebar">
-          <input
-            type="text"
-            value={playerName}
-            onChange={handlePlayerNameChange}
-            placeholder="Enter your name"
-          />
-          <button onClick={savePlayerName}>Save Name</button>
-
-          {playerName && !selectedGameName && (
+          {!playerId && (
+            <div>
+              <input
+                type="text"
+                value={playerName}
+                onChange={handlePlayerNameChange}
+                placeholder="Enter your name"
+              />
+              <button onClick={savePlayerName}>Save Name</button>
+            </div>
+          )}
+          {playerId && <div>{playerName}</div>}
+          {playerId && !selectedGameName && (
             <>
               <button className="connectButton">Connect</button>
               <button className="createButton" onClick={createGame}>

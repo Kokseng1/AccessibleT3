@@ -106,8 +106,8 @@ app.post("/api/moves", (req, res) => {
 
 app.post("/api/games/:id/join", (req, res) => {
   const gameId = req.params.id;
-  const playerId = req.body.playerId; // Adjust as necessary for your logic
-  console.log("player " + playerId + " joined server game " + gameId);
+  const playerName = req.body.playerName;
+  console.log("player " + playerName + " joined server game " + gameId);
 
   db.get(
     "SELECT player1, player2, status FROM Games WHERE game_id = ?",
@@ -125,7 +125,7 @@ app.post("/api/games/:id/join", (req, res) => {
         if (!game.player1) {
           db.run(
             "UPDATE Games SET player1 = ? WHERE game_id = ?",
-            [playerId, gameId],
+            [playerName, gameId],
             function (err) {
               if (err) {
                 console.error("Error assigning player1:", err.message);
@@ -139,7 +139,7 @@ app.post("/api/games/:id/join", (req, res) => {
         } else if (!game.player2) {
           db.run(
             "UPDATE Games SET player2 = ? WHERE game_id = ?",
-            [playerId, gameId],
+            [playerName, gameId],
             function (err) {
               if (err) {
                 console.error("Error assigning player2:", err.message);
@@ -173,3 +173,23 @@ app.get("/api/games/:id/moves", (req, res) => {
     res.json(position);
   });
 });
+
+app.put("/api/games/:id/winner", (req, res) => {
+  const { id } = req.params;
+  const { winner } = req.body; // wiinner name in the request body
+  const query = `UPDATE Games SET winner = ?, status = ? WHERE game_id = ?`;
+
+  db.run(query, [winner, "ended", id], function (err) {
+    if (err) {
+      console.error("Error updating winner:", err.message);
+      return res.status(500).json({ error: "Failed to update winner" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    res.status(200).json({ message: "Winner updated successfully", winner });
+  });
+});
+

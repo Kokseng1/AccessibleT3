@@ -85,7 +85,7 @@ const createPlayersTable = () => {
     `
       CREATE TABLE IF NOT EXISTS Players (
           player_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          player_name TEXT UNIQUE,
+          player_name TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `,
