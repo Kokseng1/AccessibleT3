@@ -87,21 +87,65 @@ app.get("/api/games/:id", (req, res) => {
 app.post("/api/moves", (req, res) => {
   const { gameId, player, position } = req.body;
 
-  db.run(
-    `INSERT INTO Moves (game_id, player, position) VALUES (?, ?, ?)`,
-    [gameId, player, position],
-    function (err) {
-      if (err) {
-        console.error("Error saving move:", err.message);
-        res.status(500).json({ error: "Failed to save move" });
-      } else {
+  // Get moves
+  db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, moves) => {
+    if (err) {
+      console.error("Error fetching moves:", err.message);
+      return res.status(500).json({ error: "Failed to fetch moves" });
+    }
+
+    if (moves.length === 9) {
+      return res.status(400).json({
+        error: `Board already full`,
+      });
+    }
+
+    const board2test = Array(9).fill(null);
+    board2test[position] = player;
+
+    for (const move of moves) {
+      if (move.position === position) {
+        return res.status(400).json({
+          error: `Position already filled by player ${move.player}`,
+        });
+      }
+      board2test[move.position] = move.player;
+    }
+
+    var winner = checkWinner(board2test);
+    if (moves.length === 8) {
+      const query = `UPDATE Games SET status = ? WHERE game_id = ?`;
+      if (winner == null) {
+        winner = "Tie";
+      }
+      db.run(query, ["ended", gameId], function (err) {
+        if (err) {
+          console.error("Error updating game status:", err.message);
+          return res
+            .status(500)
+            .json({ error: "Failed to update game status" });
+        }
+      });
+    }
+    db.run(
+      `INSERT INTO Moves (game_id, player, position) VALUES (?, ?, ?)`,
+      [gameId, player, position],
+      function (err) {
+        if (err) {
+          console.error("Error saving move:", err.message);
+          return res.status(500).json({ error: "Failed to save move" });
+        }
         console.log(
           `Move recorded for Game ID: ${gameId}, Position: ${position}, Player: ${player}`
         );
-        res.status(200).json({ message: "Move saved successfully" });
+        return res.status(200).json({
+          message: "Move saved successfully",
+          board: board2test,
+          winner,
+        });
       }
-    }
-  );
+    );
+  });
 });
 
 app.post("/api/games/:id/join", (req, res) => {
@@ -160,17 +204,27 @@ app.post("/api/games/:id/join", (req, res) => {
   );
 });
 
-// Fetch all moves for a specific game
 app.get("/api/games/:id/moves", (req, res) => {
   const gameId = req.params.id;
   //   console.log(gameId);
-  db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, position) => {
+  db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, moves) => {
     if (err) {
       console.error("Error fetching moves:", err.message);
       return res.status(500).json({ error: "Failed to fetch moves" });
     }
-    // console.log(position);
-    res.json(position);
+
+    const board = Array(9).fill(null);
+
+    moves.forEach((move) => {
+      board[move.position] = move.player;
+    });
+    var playerTurn = moves.length % 2 === 0 ? 1 : 2;
+
+    var winner = checkWinner(board);
+    if (moves.length === 9 && winner === null) {
+      winner = "Tie";
+    }
+    res.json({ board, winner, playerTurn });
   });
 });
 
@@ -193,3 +247,61 @@ app.put("/api/games/:id/winner", (req, res) => {
   });
 });
 
+app.delete("/api/gamesclear", (req, res) => {
+  console.log("in delete");
+
+  db.run("DELETE FROM Moves", (err) => {
+    if (err) {
+      console.error("Error clearing move history:", err.message);
+      return res.status(500).json({ error: "Failed to clear move history" });
+    }
+    console.log("Move history cleared");
+    db.run("DELETE FROM Games WHERE status = ?", ["ended"], (err) => {
+      if (err) {
+        console.error("Error clearing game history:", err.message);
+        return res.status(500).json({ error: "Failed to clear game history" });
+      }
+      console.log("Game history cleared");
+      res.status(200).json({ message: "Game history cleared successfully" });
+    });
+  });
+});
+
+const checkWinner = (currentBoard) => {
+  // console.log("in check winner");
+  const winningCombinations = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  for (let combination of winningCombinations) {
+    const [a, b, c] = combination;
+    if (
+      currentBoard[a] &&
+      currentBoard[a] === currentBoard[b] &&
+      currentBoard[a] === currentBoard[c]
+    ) {
+      // console.log("winner " + currentBoard[a]);
+      return currentBoard[a];
+    }
+  }
+  // console.log("no winner in check winner");
+  return null;
+};
+
+// Assuming you have a 'Games' table with details of each game
+app.get("/api/games", (req, res) => {
+  db.all("SELECT * FROM Games", (err, games) => {
+    if (err) {
+      console.error("Error fetching game history:", err.message);
+      return res.status(500).json({ error: "Failed to fetch game history" });
+    }
+    res.json(games);
+  });
+});

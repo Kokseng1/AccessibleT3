@@ -1,5 +1,6 @@
 import "./App.css";
 import React, { useEffect, useState } from "react";
+import GameHistory from "./GameHistory"; // Adjust the path as necessary
 
 function App() {
   const [games, setGames] = useState([]);
@@ -14,34 +15,6 @@ function App() {
     setPlayerName(event.target.value);
   };
   const [isPlayerTurn, setIsPlayerTurn] = useState(null);
-
-  const checkWinner = (currentBoard) => {
-    // console.log("in check winner");
-    const winningCombinations = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-
-    for (let combination of winningCombinations) {
-      const [a, b, c] = combination;
-      if (
-        currentBoard[a] &&
-        currentBoard[a] === currentBoard[b] &&
-        currentBoard[a] === currentBoard[c]
-      ) {
-        // console.log("winner " + currentBoard[a]);
-        return currentBoard[a];
-      }
-    }
-    // console.log("no winner in check winner");
-    return null;
-  };
 
   const savePlayerName = async () => {
     if (!playerName) return;
@@ -77,23 +50,15 @@ function App() {
       const data = await response.json();
       // console.log(data);
       if (response.ok) {
-        // console.log(isPlayerOne);
-        if (data.length % 2 === 0) {
-          // console.log("even");
-          setIsPlayerTurn(isPlayerOne);
-        } else {
-          // console.log("odd");
-          setIsPlayerTurn(!isPlayerOne);
+        if (data.winner) {
+          setWinner(data.winner);
         }
-        // console.log(data.length);
-        // console.log(isPlayerTurn);
-        const newBoard = Array(9).fill(null);
-        data.forEach((move) => {
-          newBoard[move.position] = move.player;
-        });
-        setBoard(newBoard);
-        const gameWinner = checkWinner(newBoard);
-        if (gameWinner) setWinner(gameWinner);
+        setBoard(data.board);
+        if (isPlayerOne) {
+          setIsPlayerTurn(data.playerTurn === 1);
+        } else {
+          setIsPlayerTurn(data.playerTurn === 2);
+        }
       } else {
         console.error("Failed to fetch board state:", data);
       }
@@ -140,33 +105,7 @@ function App() {
     const playerSymbol = isPlayerOne ? "O" : "X";
     const newBoard = [...board];
     newBoard[index] = playerSymbol;
-    const gameWinner = checkWinner(newBoard);
-    if (gameWinner) {
-      setWinner(playerName);
-      try {
-        const response = await fetch(
-          `http://localhost:8800/api/games/${selectedGameId}/winner`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ winner: playerName }),
-          }
-        );
 
-        if (!response.ok) {
-          throw new Error(`Failed to record winner: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log("Winner recorded:", data);
-      } catch (error) {
-        console.error("Error recording winner:", error.message);
-      }
-    }
-
-    // Record move in database
     try {
       const response = await fetch("http://localhost:8800/api/moves", {
         method: "POST",
@@ -180,8 +119,42 @@ function App() {
         }),
       });
 
-      if (!response.ok) {
-        console.error("Failed to save move:", await response.json());
+      const data = await response.json();
+      if (response.ok) {
+        var newwinner = data.winner;
+        if (newwinner) {
+          setWinner(data.winner);
+          try {
+            const response = await fetch(
+              `http://localhost:8800/api/games/${selectedGameId}/winner`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ winner: playerName }),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error(
+                `Failed to record winner: ${response.statusText}`
+              );
+            }
+
+            const data = await response.json();
+            console.log("Winner recorded:", data);
+          } catch (error) {
+            console.error("Error recording winner:", error.message);
+          }
+        }
+        if (data.board) {
+          console.log(data.board);
+          setBoard(data.board);
+          console.log(board);
+        }
+      } else {
+        console.error("Failed to save move:", data);
       }
     } catch (error) {
       console.error("Error recording move:", error);
@@ -322,6 +295,9 @@ function App() {
             ))}
           </div>
         </div>
+      </div>
+      <div className="GameHistory">
+        <GameHistory />
       </div>
     </div>
   );

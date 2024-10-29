@@ -52,16 +52,6 @@ h1 {
   text-align: center;
 }
 
-h1::before,
-h1::after {
-  content: "";
-  height: 3px;
-  width: 100vw;
-  background-color: #e8a915;
-  position: absolute;
-  left: 0;
-}
-
 h1::after {
   top: 50px;
 }
@@ -127,10 +117,13 @@ li {
 .cell {
   width: 100px;
   height: 100px;
-  border: 10px solid black;
-  align-items: center;
-  justify-content: center;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 5em;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid black;
 }
 
 .cell:first-child,
@@ -153,46 +146,10 @@ li {
   border-left: none;
 }
 
-/* .board.circle .cell:not(.cross):not(.circle):hover::after,
-.cell.circle::after {
-  content: "";
-  background-color: #c9c0a5;
-  height: 90px;
-  width: 90px;
-  border-radius: 50%;
+.GameHistory {
+  margin-top: 70vw;
+  margin-left: 15vw;
   position: absolute;
+  font-size: 1.5em;
+  border: 10px solid black;
 }
-
-.board.circle .cell:not(.cross):not(.circle):hover::before,
-.cell.circle::before {
-  content: "";
-  background-color: #eb0518;
-  height: 97px;
-  width: 97px;
-  border-radius: 50%;
-  position: absolute;
-}
-
-.board.cross .cell:not(.cross):not(.circle):hover::after,
-.cell.cross::after {
-  content: "";
-  background-color: #eb0518;
-  position: absolute;
-  height: 97px;
-  width: 3px;
-  transform: rotate(-45deg);
-}
-
-.board.cross .cell:not(.cross):not(.circle):hover::before,
-.cell.cross::before {
-  content: "";
-  background-color: #eb0518;
-  position: absolute;
-  height: 97px;
-  width: 3px;
-  transform: rotate(45deg);
-}
-.cell.circle,
-.cell.cross {
-  cursor: not-allowed;
-} */
