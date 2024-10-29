@@ -242,6 +242,12 @@ function App() {
     setWinner(null);
   };
 
+  const getRowCol = (index) => {
+    var col = (index % 3) + 1;
+    const row = Math.floor(index / 3) + 1;
+    return `row ${row} column ${col}`;
+  };
+
   return (
     <div className="App">
       <div></div>
@@ -252,23 +258,33 @@ function App() {
       {winner && <h2>Winner: {winner}</h2>}
       <div className="container">
         <div className="sidebar">
+          <h3 className="informationSection">
+            side bar, navigate this section vertically to create, join and quit
+            games
+          </h3>
           {!playerId && (
             <div>
-              <input
-                type="text"
-                value={playerName}
-                onChange={handlePlayerNameChange}
-                placeholder="Enter your name"
-              />
-              <button onClick={savePlayerName}>Save Name</button>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  savePlayerName();
+                }}
+              >
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={handlePlayerNameChange}
+                  placeholder="Enter your name"
+                />
+                <button type="submit">Save Name</button>
+              </form>
             </div>
           )}
-          {playerId && <div>{playerName}</div>}
+          {playerId && <div>Name : {playerName}</div>}
           {playerId && !selectedGameName && (
             <>
-              <button className="connectButton">Connect</button>
               <button className="createButton" onClick={createGame}>
-                Create
+                Create game
               </button>
               <label>Available Games</label>
               <ul>
@@ -280,10 +296,10 @@ function App() {
                       <button
                         onClick={() => joinGame(game.game_name, game.game_id)}
                       >
-                        Game {game.game_id}
+                        Enter Game {game.game_id}
                       </button>
                       <button onClick={() => deleteGame(game.game_id)}>
-                        Delete
+                        Delete game {game.game_id}
                       </button>
                     </li>
                   ))
@@ -299,14 +315,25 @@ function App() {
           )}
         </div>
         <div className="mainbar">
+          <h3 className="informationSection">
+            mainbar, use this grid to keep track of your current game
+          </h3>
           <div className="board">
             {board.map((cell, index) => (
-              <div
-                key={index}
-                className="cell"
-                onClick={() => handleClick(index)}
-              >
-                {cell}
+              <div key={index} className="cell">
+                {selectedGameName && (
+                  <button
+                    className="joinButton"
+                    onClick={() => handleClick(index)}
+                  >
+                    {cell == "X"
+                      ? "cross in "
+                      : cell == "O"
+                      ? "circle in "
+                      : "Place in "}
+                    {getRowCol(index)}
+                  </button>
+                )}
               </div>
             ))}
           </div>

@@ -153,3 +153,7 @@ li {
   font-size: 1.5em;
   border: 10px solid black;
 }
+
+.informationSection {
+  margin-bottom: 60px;
+}
