@@ -5,7 +5,6 @@ import AccessibleAlert from "./AccessibleAlert";
 
 function App() {
   const [games, setGames] = useState([]);
-  const [selectedGameName, setSelectedGameName] = useState(null);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [playerName, setPlayerName] = useState("");
   const [playerId, setPlayerId] = useState(null);
@@ -14,7 +13,9 @@ function App() {
   const [winner, setWinner] = useState(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [isPlayerTurn, setIsPlayerTurn] = useState(null);
-  const [latestMove, setLatestMove] = useState(null);
+  const [latestMove, setLatestMove] = useState(
+    "check here for the latest move made in a game"
+  );
 
   const handlePlayerNameChange = (event) => {
     setPlayerName(event.target.value);
@@ -34,7 +35,6 @@ function App() {
       const data = await response.json();
       if (response.ok) {
         setPlayerId(data.playerId);
-        console.log("Player added:", data.playerName);
         setAlertMessage("player created with name " + data.playerName);
       } else {
         console.error("Failed to save player name:", data);
@@ -56,24 +56,30 @@ function App() {
       setWinner(data.winner);
       setIsPlayerTurn(false);
     }
-    compareBoardState(data.board);
+    compareBoardState(data.board); //update latest move
     setBoard(data.board);
 
     if (
       (isPlayerOne && data.playerTurn == 1) ||
       (!isPlayerOne && data.playerTurn == 2)
     ) {
-      if (!isPlayerTurn) {
-        setAlertMessage("it is now your turn");
-      }
       setIsPlayerTurn(true);
     } else {
       setIsPlayerTurn(false);
     }
   };
 
-  function compareBoardState(state) {
-    
+  function compareBoardState(newBoard) {
+    for (let i = 0; i < newBoard.length; i++) {
+      if (newBoard[i] !== board[i]) {
+        const playerSymbol = newBoard[i] == "O" ? "circle" : "cross";
+        setAlertMessage(playerSymbol + " has been placed in " + getRowCol(i));
+        setLatestMove(
+          "Latest move : " + playerSymbol + " placed in " + getRowCol(i)
+        );
+        break;
+      }
+    }
   }
 
   const fetchGames = async () => {
@@ -144,39 +150,25 @@ function App() {
       });
 
       const data = await response.json();
-      if (response.ok) {
-        var newwinner = data.winner;
-        if (newwinner) {
-          setAlertMessage("Congratulations, you have won the game");
-          setWinner(data.winner);
-          try {
-            const response = await fetch(
-              `http://localhost:8800/api/games/${selectedGameId}/winner`,
-              {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ winner: playerName }),
-              }
-            );
 
-            if (!response.ok) {
-              throw new Error(
-                `Failed to record winner: ${response.statusText}`
-              );
-            }
-            const data = await response.json();
-            console.log("Winner recorded:", data);
-          } catch (error) {
-            setAlertMessage("Error recording winner:", error.message);
+      var newwinner = data.winner;
+      if (newwinner) {
+        setAlertMessage("Congratulations, you have won the game");
+        setWinner(data.winner);
+        await fetch(
+          `http://localhost:8800/api/games/${selectedGameId}/winner`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ winner: playerName }),
           }
-        }
-        if (data.board) {
-          setBoard(data.board);
-        }
-      } else {
-        setAlertMessage("Failed to save move:", data);
+        );
+      }
+
+      if (data.board) {
+        setBoard(data.board);
       }
     } catch (error) {
       setAlertMessage("Error recording move:" + error);
@@ -185,7 +177,6 @@ function App() {
 
   const createGame = async () => {
     try {
-      console.log("creating game");
       const response = await fetch("http://localhost:8800/api/games", {
         method: "POST",
         headers: {
@@ -198,7 +189,6 @@ function App() {
 
       const data = await response.json();
       if (response.ok) {
-        console.log("alert message game number X created");
         setGames((prevGames) => [...prevGames, data]);
         setAlertMessage("Game number" + data.game_id + "created");
       } else {
@@ -210,33 +200,27 @@ function App() {
   };
 
   const joinGame = async (game_name, gameId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8800/api/games/${gameId}/join`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ playerName: playerName }),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedGameName(game_name); // Update the selected game
-        setSelectedGameId(gameId);
-        setIsPlayerOne(data.player === "player1");
-        const playerSymbol = data.player == "player1" ? "Circle" : "Cross";
-        console.log("setalert messgae you have joined");
-        setAlertMessage(
-          "You have joined game" + gameId + ", playing as " + playerSymbol
-        );
-      } else {
-        console.error("Failed to join game:", await response.json());
+    const response = await fetch(
+      `http://localhost:8800/api/games/${gameId}/join`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ playerName: playerName }),
       }
-    } catch (error) {
-      console.error("Error:", error);
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      setSelectedGameId(gameId);
+      setIsPlayerOne(data.player === "player1");
+      const playerSymbol = data.player == "player1" ? "Circle" : "Cross";
+      setAlertMessage(
+        "You have joined game" + gameId + ", playing as " + playerSymbol
+      );
+    } else {
+      setAlertMessage("Failed to join game:", await response.json());
     }
   };
 
@@ -248,28 +232,26 @@ function App() {
           method: "DELETE",
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete game");
-      }
-
-      // Fetch the updated list of games
+      setAlertMessage("Game " + gameId + "has been deleted");
       fetchGames();
     } catch (error) {
-      console.error("Error deleting game:", error.message);
+      setAlertMessage("Error deleting game:", error.message);
     }
   };
-  // const [games, setGames] = useSta
+
   const quitCurrentSession = async () => {
     setSelectedGameId(null);
-    setSelectedGameName("");
     setBoard(Array(9).fill(null));
     setIsPlayerTurn(false);
     setWinner(null);
+    setLatestMove("check here for the latest move made in a game");
+    setAlertMessage(
+      "You have quit the game, create or join another game to play again"
+    );
   };
 
   const getRowCol = (index) => {
-    var col = (index % 3) + 1;
+    const col = (index % 3) + 1;
     const row = Math.floor(index / 3) + 1;
     return `row ${row} column ${col}`;
   };
@@ -279,8 +261,7 @@ function App() {
       <div></div>
 
       <h1>Inclusive Tic Tac Toe</h1>
-      {selectedGameName && <h2>{selectedGameName}</h2>}
-      {selectedGameName && <h2>playing as {isPlayerOne ? "O" : "X"}</h2>}
+
       {winner && <h2>Winner: {winner}</h2>}
       <div className="container">
         <div className="sidebar">
@@ -307,7 +288,7 @@ function App() {
             </div>
           )}
           {playerId && <div>Name {playerName}</div>}
-          {playerId && !selectedGameName && (
+          {playerId && !selectedGameId && (
             <>
               <button className="createButton" onClick={createGame}>
                 Create game
@@ -315,7 +296,9 @@ function App() {
               <label id="gamesLabel">List of Available Games</label>
               <ul>
                 {games.length === 0 ? (
-                  <li>No games available</li>
+                  <li>
+                    No games available, navigate backward to create a game
+                  </li>
                 ) : (
                   games.map((game) => (
                     <li key={game.game_id}>
@@ -334,7 +317,7 @@ function App() {
             </>
           )}
 
-          {playerId && selectedGameName && (
+          {playerId && selectedGameId && (
             <button className="joinButton" onClick={() => quitCurrentSession()}>
               Quit current session
             </button>
@@ -344,26 +327,32 @@ function App() {
           <h3 className="informationSection">
             mainbar, use the grid below to keep track of your current game
           </h3>
-          {selectedGameName && (
-            <div className="board">
-              {board.map((cell, index) => (
-                <div key={index} className="cell">
-                  <button
-                    className="joinButton"
-                    onClick={() => handleClick(index)}
-                  >
-                    {cell == "X"
-                      ? "cross in "
-                      : cell == "O"
-                      ? "circle in "
-                      : "Place in "}
-                    {getRowCol(index)}
-                  </button>
-                </div>
-              ))}
+          {selectedGameId && (
+            <div>
+              <p>Game {selectedGameId}</p>
+              <p>Playing as {isPlayerOne ? "O" : "X"}</p>
+              <p role="latest move">{latestMove}</p>
+              <div className="board">
+                {board.map((cell, index) => (
+                  <div key={index} className="cell">
+                    <button
+                      className="joinButton"
+                      onClick={() => handleClick(index)}
+                    >
+                      {cell == "X"
+                        ? "cross in "
+                        : cell == "O"
+                        ? "circle in "
+                        : "Place in "}
+                      {getRowCol(index)}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-          {!selectedGameName && (
+
+          {!selectedGameId && (
             <p role="prompt to start a game">
               You are not in a game currently, join a game using the sidebar to
               start playing

@@ -77,6 +77,9 @@ button {
   grid-template-columns: 25% 75%;
 }
 
+p {
+}
+
 .sidebar {
   background-color: #e8b338;
   display: flex;
@@ -106,11 +109,13 @@ li {
   width: 70%;
   height: 70%;
   margin: auto;
-  margin-top: 15%;
+  margin-top: 0%;
+  margin-bottom: 10%;
   display: grid;
   grid-template-columns: repeat(3, auto);
   justify-content: center;
   align-content: center;
+  position: absolute;
 }
 
 .cell {
@@ -147,7 +152,7 @@ li {
 
 .GameHistory {
   background-color: #e7e1cd;
-  margin-top: 70vw;
+  margin-top: 75vw;
   position: absolute;
   width: 100vw;
   font-size: 1.5em;
