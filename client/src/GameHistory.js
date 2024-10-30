@@ -5,6 +5,7 @@ const GameHistory = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [games, setGames] = useState([]);
   const [confimationMsg, setConfirmationMsg] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleConfirmationChange = (event) => {
     setConfirmationMsg(event.target.value);
@@ -35,7 +36,7 @@ const GameHistory = () => {
     if (confimationMsg.toLowerCase() != "confirm clear") {
       console.log("clearing");
       setAlertMessage(
-        "Wrong confirmation message! Type 'confirm clear' in to clear game history"
+        "Wrong confirmation message! Type 'confirm clear' to clear game history"
       );
     } else {
       try {
@@ -51,9 +52,26 @@ const GameHistory = () => {
     }
   };
 
+  const filteredGames = games.filter(
+    (game) =>
+      (game.player1?.toLowerCase() || "").includes(searchTerm) ||
+      (game.player2?.toLowerCase() || "").includes(searchTerm)
+  );
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
   return (
     <div>
       <h1 id="history-title">Game History Table</h1>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        placeholder="Search by player name"
+      />
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -64,7 +82,7 @@ const GameHistory = () => {
           type="text"
           value={confimationMsg}
           onChange={handleConfirmationChange}
-          placeholder="Type 'confirm clear' in to clear game history and hit enter"
+          placeholder="Type 'confirm clear' to clear game history and hit enter"
         />
       </form>
 
@@ -83,7 +101,7 @@ const GameHistory = () => {
               </tr>
             </thead>
             <tbody>
-              {games.map((game) => (
+              {filteredGames.map((game) => (
                 <tr key={game.game_id} tabIndex="0">
                   <td>{game.game_id}</td>
                   <td>{game.player1}</td>

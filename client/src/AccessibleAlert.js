@@ -8,8 +8,9 @@ function AccessibleAlert({ message }) {
     if (message) {
       console.log("message detected" + message);
       setAlertMessage(message);
-      // Clear the message after a delay
-      setTimeout(() => setAlertMessage(""), 3000);
+      setTimeout(() => {
+        setAlertMessage("");
+      }, 3000);
     }
   }, [message]);
 
@@ -22,7 +23,7 @@ function AccessibleAlert({ message }) {
         aria-atomic="true"
         style={{
           position: "absolute",
-          left: "-9999px", // Visually hidden
+          left: "-9999px",
         }}
       >
         {alertMessage}

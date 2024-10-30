@@ -14,6 +14,7 @@ function App() {
   const [winner, setWinner] = useState(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [isPlayerTurn, setIsPlayerTurn] = useState(null);
+  const [latestMove, setLatestMove] = useState(null);
 
   const handlePlayerNameChange = (event) => {
     setPlayerName(event.target.value);
@@ -45,36 +46,35 @@ function App() {
 
   const fetchBoardState = async () => {
     if (!selectedGameId) return;
-    try {
-      const response = await fetch(
-        `http://localhost:8800/api/games/${selectedGameId}/moves`
-      );
-      const data = await response.json();
-      // console.log(data);
-      if (response.ok) {
-        if (data.winner) {
-          setWinner(data.winner);
-          setIsPlayerTurn(false);
-        }
-        
-        setBoard(data.board);
-        if (
-          (isPlayerOne && data.playerTurn == 1) ||
-          (!isPlayerOne && data.playerTurn == 2)
-        ) {
-          if (!isPlayerTurn) {
-            console.log("alert its not ur turn");
-            setAlertMessage("it is now your turn");
-          }
-          setIsPlayerTurn(true);
-        }
-      } else {
-        console.error("Failed to fetch board state:", data);
+
+    const response = await fetch(
+      `http://localhost:8800/api/games/${selectedGameId}/moves`
+    );
+
+    const data = await response.json();
+    if (data.winner) {
+      setWinner(data.winner);
+      setIsPlayerTurn(false);
+    }
+    compareBoardState(data.board);
+    setBoard(data.board);
+
+    if (
+      (isPlayerOne && data.playerTurn == 1) ||
+      (!isPlayerOne && data.playerTurn == 2)
+    ) {
+      if (!isPlayerTurn) {
+        setAlertMessage("it is now your turn");
       }
-    } catch (error) {
-      console.error("Error fetching board state:", error);
+      setIsPlayerTurn(true);
+    } else {
+      setIsPlayerTurn(false);
     }
   };
+
+  function compareBoardState(state) {
+    
+  }
 
   const fetchGames = async () => {
     try {
@@ -105,7 +105,6 @@ function App() {
     };
 
     updateFetches();
-
     const intervalId = setInterval(updateFetches, 1000);
 
     return () => clearInterval(intervalId);
@@ -113,7 +112,8 @@ function App() {
 
   const handleClick = async (index) => {
     if (board[index]) {
-      setAlertMessage("This space is already taken by" + board[index]);
+      const playerSymbol = board[index] == "O" ? "circle" : "cross";
+      setAlertMessage("This space is already taken by " + playerSymbol);
       return;
     }
 
@@ -130,9 +130,6 @@ function App() {
     }
 
     const playerSymbol = isPlayerOne ? "O" : "X";
-    const newBoard = [...board];
-    newBoard[index] = playerSymbol;
-
     try {
       const response = await fetch("http://localhost:8800/api/moves", {
         method: "POST",
@@ -169,23 +166,19 @@ function App() {
                 `Failed to record winner: ${response.statusText}`
               );
             }
-
             const data = await response.json();
             console.log("Winner recorded:", data);
           } catch (error) {
-            console.error("Error recording winner:", error.message);
+            setAlertMessage("Error recording winner:", error.message);
           }
         }
         if (data.board) {
-          console.log(data.board);
           setBoard(data.board);
-          console.log(board);
         }
       } else {
-        console.error("Failed to save move:", data);
+        setAlertMessage("Failed to save move:", data);
       }
     } catch (error) {
-      console.error("Error recording move:", error);
       setAlertMessage("Error recording move:" + error);
     }
   };
