@@ -49,6 +49,7 @@ const GameHistory = () => {
         console.error("Error clearing game history:", error);
       }
       setAlertMessage("Game history cleared");
+      setConfirmationMsg("");
     }
   };
 

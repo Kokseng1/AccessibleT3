@@ -76,7 +76,6 @@ app.post("/api/players", (req, res) => {
 app.post("/api/moves", (req, res) => {
   const { gameId, player, position } = req.body;
 
-  // Get moves
   db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, moves) => {
     if (err) {
       console.error("Error fetching moves:", err.message);
@@ -202,7 +201,6 @@ app.post("/api/games/:id/join", (req, res) => {
 // get current game state
 app.get("/api/games/:id/currentBoardState", (req, res) => {
   const gameId = req.params.id;
-  //   console.log(gameId);
   db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, moves) => {
     if (err) {
       console.error("Error fetching moves:", err.message);
@@ -277,7 +275,6 @@ app.delete("/api/gamesclear", (req, res) => {
 });
 
 const checkWinner = (currentBoard) => {
-  // console.log("in check winner");
   const winningCombinations = [
     [0, 1, 2],
     [3, 4, 5],
@@ -296,15 +293,13 @@ const checkWinner = (currentBoard) => {
       currentBoard[a] === currentBoard[b] &&
       currentBoard[a] === currentBoard[c]
     ) {
-      // console.log("winner " + currentBoard[a]);
       return currentBoard[a];
     }
   }
-  // console.log("no winner in check winner");
   return null;
 };
 
-// Assuming you have a 'Games' table with details of each game
+//get all games
 app.get("/api/games", (req, res) => {
   db.all("SELECT * FROM Games", (err, games) => {
     if (err) {
