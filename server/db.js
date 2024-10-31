@@ -7,12 +7,10 @@ const db = new sqlite3.Database("./tictactoe.db", (err) => {
   } else {
     console.log("Connected to the SQLite database.");
 
-    // Reset tables on run (optional)
-    resetTables();
+    // resetTables();
   }
 });
 
-// Function to drop and create tables
 const resetTables = () => {
   dropTable("Moves", createMovesTable);
 };

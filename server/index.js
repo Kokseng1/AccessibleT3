@@ -9,7 +9,8 @@ app.listen(8800, () => {
 
 app.use(express.json());
 app.use(cors());
-//create game
+
+// create game
 app.post("/api/games", (req, res) => {
   const { game_name } = req.body;
 
@@ -23,6 +24,7 @@ app.post("/api/games", (req, res) => {
   });
 });
 
+// delete game
 app.delete("/api/games/:id", (req, res) => {
   const { id } = req.params;
 
@@ -41,6 +43,7 @@ app.delete("/api/games/:id", (req, res) => {
   });
 });
 
+// get all games
 app.get("/api/games", (req, res) => {
   db.all("SELECT * FROM games", [], (err, rows) => {
     if (err) {
@@ -51,6 +54,7 @@ app.get("/api/games", (req, res) => {
   });
 });
 
+// create players
 app.post("/api/players", (req, res) => {
   const { playerName } = req.body;
 
@@ -68,22 +72,7 @@ app.post("/api/players", (req, res) => {
   );
 });
 
-app.get("/api/games/:id", (req, res) => {
-  const { id } = req.params;
-
-  db.get("SELECT * FROM games WHERE id = ?", [id], (err, row) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    if (!row) {
-      res.status(404).json({ error: "Game not found" });
-      return;
-    }
-    res.json(row);
-  });
-});
-
+// make move
 app.post("/api/moves", (req, res) => {
   const { gameId, player, position } = req.body;
 
@@ -148,6 +137,7 @@ app.post("/api/moves", (req, res) => {
   });
 });
 
+// add player to game (join game)
 app.post("/api/games/:id/join", (req, res) => {
   const gameId = req.params.id;
   const playerName = req.body.playerName;
@@ -209,7 +199,8 @@ app.post("/api/games/:id/join", (req, res) => {
   );
 });
 
-app.get("/api/games/:id/moves", (req, res) => {
+// get current game state
+app.get("/api/games/:id/currentBoardState", (req, res) => {
   const gameId = req.params.id;
   //   console.log(gameId);
   db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, moves) => {
@@ -233,6 +224,7 @@ app.get("/api/games/:id/moves", (req, res) => {
   });
 });
 
+// record winner
 app.put("/api/games/:id/winner", (req, res) => {
   const { id } = req.params;
   const { winner } = req.body; // wiinner name in the request body
@@ -252,24 +244,36 @@ app.put("/api/games/:id/winner", (req, res) => {
   });
 });
 
+// delete all ended games and their moves
 app.delete("/api/gamesclear", (req, res) => {
-  console.log("in delete");
+  db.all(
+    "SELECT game_id FROM Games WHERE status = ?",
+    ["ended"],
+    (err, games) => {
+      const gameIds = games.map((game) => game.game_id);
+      db.run(
+        `DELETE FROM Moves WHERE game_id IN (${gameIds.join(",")})`,
+        function (err) {
+          if (err) {
+            return res
+              .status(500)
+              .json({ error: "Failed to clear move history" });
+          }
 
-  db.run("DELETE FROM Moves", (err) => {
-    if (err) {
-      console.error("Error clearing move history:", err.message);
-      return res.status(500).json({ error: "Failed to clear move history" });
+          db.run("DELETE FROM Games WHERE status = ?", ["ended"], (err) => {
+            if (err) {
+              return res
+                .status(500)
+                .json({ error: "Failed to clear game history" });
+            }
+            res
+              .status(200)
+              .json({ message: "Game history cleared successfully" });
+          });
+        }
+      );
     }
-    console.log("Move history cleared");
-    db.run("DELETE FROM Games WHERE status = ?", ["ended"], (err) => {
-      if (err) {
-        console.error("Error clearing game history:", err.message);
-        return res.status(500).json({ error: "Failed to clear game history" });
-      }
-      console.log("Game history cleared");
-      res.status(200).json({ message: "Game history cleared successfully" });
-    });
-  });
+  );
 });
 
 const checkWinner = (currentBoard) => {

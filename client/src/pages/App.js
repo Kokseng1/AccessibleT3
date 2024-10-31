@@ -54,7 +54,7 @@ function App() {
     if (!selectedGameId) return;
 
     const response = await fetch(
-      `http://localhost:8800/api/games/${selectedGameId}/moves`
+      `http://localhost:8800/api/games/${selectedGameId}/currentBoardState`
     );
 
     const data = await response.json();
@@ -79,7 +79,7 @@ function App() {
     for (let i = 0; i < newBoard.length; i++) {
       if (newBoard[i] !== board[i]) {
         const playerSymbol = newBoard[i] == "O" ? "circle" : "cross";
-        setAlertMessage(playerSymbol + " has been placed in " + getRowCol(i));
+        // setAlertMessage(playerSymbol + " has been placed in " + getRowCol(i));
         setLatestMove(
           "Latest move : " + playerSymbol + " placed in " + getRowCol(i)
         );
