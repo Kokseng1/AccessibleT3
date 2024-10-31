@@ -62,9 +62,17 @@ function App() {
       setWinner(data.winner);
       setIsPlayerTurn(false);
     }
-    compareBoardState(data.board); //update latest move
     setBoard(data.board);
-
+    if (data.latestMovePlayer != null && data.latestMovePosition != null) {
+      const latestMovePlayerSymbol =
+        data.latestMovePlayer.toLowerCase() == "o" ? "circle" : "cross";
+      setLatestMove(
+        "Latest move : " +
+          latestMovePlayerSymbol +
+          " placed in " +
+          getRowCol(data.latestMovePosition)
+      );
+    }
     if (
       (isPlayerOne && data.playerTurn == 1) ||
       (!isPlayerOne && data.playerTurn == 2)
@@ -74,19 +82,6 @@ function App() {
       setIsPlayerTurn(false);
     }
   };
-
-  function compareBoardState(newBoard) {
-    for (let i = 0; i < newBoard.length; i++) {
-      if (newBoard[i] !== board[i]) {
-        const playerSymbol = newBoard[i] == "O" ? "circle" : "cross";
-        // setAlertMessage(playerSymbol + " has been placed in " + getRowCol(i));
-        setLatestMove(
-          "Latest move : " + playerSymbol + " placed in " + getRowCol(i)
-        );
-        break;
-      }
-    }
-  }
 
   const fetchGames = async () => {
     try {
@@ -109,6 +104,12 @@ function App() {
       console.error("Error:", error);
     }
   };
+
+  useEffect(() => {
+    if (latestMove) {
+      setAlertMessage(latestMove);
+    }
+  }, [latestMove]);
 
   useEffect(() => {
     const updateFetches = async () => {
@@ -160,6 +161,7 @@ function App() {
       var newwinner = data.winner;
       if (newwinner) {
         setAlertMessage("Congratulations, you have won the game");
+        // compareBoardState(data.board);
         setWinner(data.winner);
         await fetch(
           `http://localhost:8800/api/games/${selectedGameId}/winner`,
@@ -263,8 +265,6 @@ function App() {
       <div></div>
 
       <h1>Inclusive Tic Tac Toe</h1>
-
-      {winner && <h2>Winner: {winner}</h2>}
       <div className="container">
         <div className="sidebar">
           <h3 className="informationSection" role="Information Section">
@@ -330,8 +330,9 @@ function App() {
           {selectedGameId && (
             <div>
               <p>{"Game " + selectedGameId}</p>
-              <p>Playing as {isPlayerOne ? "O" : "X"}</p>
+              <p>Playing as {isPlayerOne ? "circle" : "cross"}</p>
               <p role="latest move">{latestMove}</p>
+              {winner && <p>Winner: {winner}</p>}
               <div className="board">
                 {board.map((cell, index) => (
                   <div key={index} className="cell">

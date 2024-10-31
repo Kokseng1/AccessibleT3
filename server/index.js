@@ -201,6 +201,7 @@ app.post("/api/games/:id/join", (req, res) => {
 // get current game state
 app.get("/api/games/:id/currentBoardState", (req, res) => {
   const gameId = req.params.id;
+  let latestMove = null;
   db.all("SELECT * FROM Moves WHERE game_id = ?", [gameId], (err, moves) => {
     if (err) {
       console.error("Error fetching moves:", err.message);
@@ -210,15 +211,30 @@ app.get("/api/games/:id/currentBoardState", (req, res) => {
     const board = Array(9).fill(null);
 
     moves.forEach((move) => {
+      if (!latestMove || move.move_id > latestMove.move_id) {
+        latestMove = move;
+      }
       board[move.position] = move.player;
     });
-    var playerTurn = moves.length % 2 === 0 ? 1 : 2;
+    var latestMovePosition = null;
+    var latestMovePlayer = null;
+    if (latestMove) {
+      latestMovePosition = latestMove.position;
+      latestMovePlayer = latestMove.player;
+    }
 
+    const playerTurn = moves.length % 2 === 0 ? 1 : 2;
     var winner = checkWinner(board);
     if (moves.length === 9 && winner === null) {
       winner = "Tie";
     }
-    res.json({ board, winner, playerTurn });
+    res.json({
+      board,
+      winner,
+      playerTurn,
+      latestMovePlayer,
+      latestMovePosition,
+    });
   });
 });
 

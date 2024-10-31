@@ -71,7 +71,7 @@ button {
   border: 2px solid black;
   width: 100vw;
   height: 80vh;
-  top: 34vh;
+  top: 15vh;
   position: absolute;
   display: grid;
   grid-template-columns: 25% 75%;
