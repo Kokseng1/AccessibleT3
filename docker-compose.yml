@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  backend:
+    build:
+      context: ./server # Path to your Node backend directory
+    ports:
+      - "8800:8800"
+    # volumes:
+    #   - ./server:/usr/src/app # Syncs the local backend directory with the container
+    environment:
+      - NODE_ENV=development
+
+  frontend:
+    build:
+      context: ./client # Path to your React frontend directory
+    ports:
+      - "3000:80" # React app will be served on port 3000
