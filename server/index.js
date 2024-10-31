@@ -82,9 +82,19 @@ app.post("/api/moves", (req, res) => {
       return res.status(500).json({ error: "Failed to fetch moves" });
     }
 
+    const playerTurn = moves.length % 2 === 0 ? 1 : 2;
+    if (
+      (playerTurn == 1 && player == "X") ||
+      (playerTurn == 2 && player == "O")
+    ) {
+      return res.status(400).json({
+        error: `It is currently not your turn`,
+      });
+    }
+
     if (moves.length === 9) {
       return res.status(400).json({
-        error: `Board already full`,
+        error: `Game has ended, board is full`,
       });
     }
 
@@ -94,7 +104,9 @@ app.post("/api/moves", (req, res) => {
     for (const move of moves) {
       if (move.position === position) {
         return res.status(400).json({
-          error: `Position already filled by player ${move.player}`,
+          error: `Position already has a ${
+            move.player == "O" ? "circle" : "cross"
+          }`,
         });
       }
       board2test[move.position] = move.player;
@@ -106,14 +118,7 @@ app.post("/api/moves", (req, res) => {
       if (winner == null) {
         winner = "Tie";
       }
-      db.run(query, ["ended", gameId], function (err) {
-        if (err) {
-          console.error("Error updating game status:", err.message);
-          return res
-            .status(500)
-            .json({ error: "Failed to update game status" });
-        }
-      });
+      db.run(query, ["ended", gameId], function (err) {});
     }
     db.run(
       `INSERT INTO Moves (game_id, player, position) VALUES (?, ?, ?)`,
@@ -123,9 +128,6 @@ app.post("/api/moves", (req, res) => {
           console.error("Error saving move:", err.message);
           return res.status(500).json({ error: "Failed to save move" });
         }
-        console.log(
-          `Move recorded for Game ID: ${gameId}, Position: ${position}, Player: ${player}`
-        );
         return res.status(200).json({
           message: "Move saved successfully",
           board: board2test,

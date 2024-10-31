@@ -1,10 +1,16 @@
+## About AccessibleT3
+
+The AccessibleT3 project is built with React, Node.js, and SQLite, and is containerized with Docker for easy deployment. It is designed to create an inclusive, fully accessible experience for all players, especially those using screen readers. To ensure accessibility, I prioritized sequential readability, arranging all elements on a single page to simplify navigation for screen readers. There are 3 components, side bar for managing all games, main bar for playing the current game, and game history section to view past games. These components are neatly divided and documented for easier navigation. Key game actions—including setting player names, creating, deleting, or joining games, and making moves—are accompanied by alerts that screen readers announce, ensuring players receive timely feedback for each action. Error messages are also announced, guiding users through potential issues like invalid moves, attempts to access the board without joining a game, or incorrect confirmation inputs.
+
+The interface uses clear, descriptive text throughout to help players easily track game progress, while concise labels and straightforward design support efficient interaction. These accessibility-first design choices ensure a smooth, responsive experience, keeping AccessibleT3 inclusive and user-friendly for all players.
+
 # Set Up Guide for AccessibleT3
 
 This guide will help you set up the AccessibleT3 project on your local machine. Please follow each step carefully.
 
 ## Prerequisites
 
-Before you begin, ensure you have the following software installed on your device:
+Before you begin, ensure you have the following software installed on your device using your terminal:
 
 1. **Docker**:
 
@@ -50,7 +56,7 @@ Before you begin, ensure you have the following software installed on your devic
 
 1. Ensure that Docker is running. You can check this by looking for the Docker icon in your system tray or taskbar.
 
-2. Build and start the application using Docker Compose with the following command:
+2. Build and start the application using Docker Compose with the following command (you might need to run command line with administrative rights):
 
    ```bash
    docker-compose up --build

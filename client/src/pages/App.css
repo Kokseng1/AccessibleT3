@@ -37,6 +37,10 @@
   }
 }
 
+:root {
+  background-color: #5599c0; /* Light gray background color */
+}
+
 *::before,
 *::after,
 * {
@@ -69,30 +73,39 @@ button {
 
 .container {
   border: 2px solid black;
-  width: 100vw;
+  width: 80vw;
+  margin-left: 10vw;
   height: 80vh;
-  top: 15vh;
+  top: 10vh;
   position: absolute;
   display: grid;
   grid-template-columns: 25% 75%;
 }
 
-p {
+.GameHistory {
+  background-color: #789ed8;
+  /* margin-top: 75vw; */
+  top: calc(10vh + 80vh);
+  position: absolute;
+  width: 80vw;
+  margin-left: 10vw;
+  font-size: 1.5em;
+  border: 2px solid black;
 }
 
 .sidebar {
-  background-color: #e8b338;
+  background-color: #8f95eb;
   display: flex;
   flex-flow: column;
   justify-content: center;
 }
 
 .mainbar {
-  background-color: #c9c0a5;
+  background-color: #4269a3;
 }
 button,
 label {
-  background-color: #f2f1ed;
+  background-color: #8f95eb;
   margin-top: 4px;
 }
 ul {
@@ -130,9 +143,9 @@ li {
   border: 2px solid black;
 }
 
-.cell:first-child,
-:nth-child(2),
-:nth-child(3) {
+.container .cell:first-child,
+.container .cell:nth-child(2),
+.container .cell:nth-child(3) {
   border-top: none;
 }
 
@@ -150,14 +163,6 @@ li {
   border-left: none;
 }
 
-.GameHistory {
-  background-color: #e7e1cd;
-  margin-top: 75vw;
-  position: absolute;
-  width: 100vw;
-  font-size: 1.5em;
-  border: 4px solid black;
-}
 .gameHistoryTable th,
 .gameHistoryTable td {
   padding: 10px;
@@ -165,10 +170,35 @@ li {
 }
 
 .gameHistoryTable {
-  margin: 0 auto; /* Center the table */
-  border-collapse: collapse; /* Remove spacing between table cells */
+  margin: 0 auto;
+  border-collapse: collapse;
 }
 
 .informationSection {
   margin-bottom: 60px;
+}
+
+button {
+  padding: 1px 1px;
+  font-size: 15px;
+  font-weight: bold;
+  background-color: #8f95eb;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+input {
+  padding: 10px 12px;
+  font-size: 15px;
+  color: #333;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  width: 50%;
+  margin-top: 4px;
+}
+
+table {
+  margin-top: 20px;
+  padding-top: 200px;
 }

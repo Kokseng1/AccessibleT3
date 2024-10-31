@@ -124,24 +124,6 @@ function App() {
   }, [selectedGameId]);
 
   const handleClick = async (index) => {
-    if (board[index]) {
-      const playerSymbol = board[index] == "O" ? "circle" : "cross";
-      setAlertMessage("This space is already taken by " + playerSymbol);
-      return;
-    }
-
-    if (winner) {
-      const winnerSymbol = winner == "O" ? "circle" : "cross";
-      setAlertMessage(
-        "This game has ended " + winnerSymbol + " has won the game"
-      );
-      return;
-    }
-    if (!isPlayerTurn) {
-      setAlertMessage("It is currently not your turn");
-      return;
-    }
-
     const playerSymbol = isPlayerOne ? "O" : "X";
     try {
       const response = await fetch("http://localhost:8800/api/moves", {
@@ -157,11 +139,17 @@ function App() {
       });
 
       const data = await response.json();
+      if (!response.ok) {
+        setAlertMessage(data);
+      }
 
       var newwinner = data.winner;
       if (newwinner) {
-        setAlertMessage("Congratulations, you have won the game");
-        // compareBoardState(data.board);
+        if (newwinner == "Tie") {
+          setAlertMessage("Game has ended in a tie");
+        } else {
+          setAlertMessage("Congratulations, you have won the game");
+        }
         setWinner(data.winner);
         await fetch(
           `http://localhost:8800/api/games/${selectedGameId}/winner`,
