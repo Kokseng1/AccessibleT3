@@ -6,8 +6,12 @@ import AccessibleAlert from "./AccessibleAlert";
 function App() {
   const [games, setGames] = useState([]);
   const [selectedGameId, setSelectedGameId] = useState(null);
-  const [playerName, setPlayerName] = useState("");
-  const [playerId, setPlayerId] = useState(null);
+  const [playerName, setPlayerName] = useState(
+    localStorage.getItem("playerName") || null
+  );
+  const [playerId, setPlayerId] = useState(
+    localStorage.getItem("playerId") || null
+  );
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isPlayerOne, setIsPlayerOne] = useState(true);
   const [winner, setWinner] = useState(null);
@@ -35,6 +39,8 @@ function App() {
       const data = await response.json();
       if (response.ok) {
         setPlayerId(data.playerId);
+        localStorage.setItem("playerId", data.playerId);
+        localStorage.setItem("playerName", playerName);
         setAlertMessage("player created with name " + data.playerName);
       } else {
         console.error("Failed to save player name:", data);
@@ -188,18 +194,14 @@ function App() {
       });
 
       const data = await response.json();
-      if (response.ok) {
-        setGames((prevGames) => [...prevGames, data]);
-        setAlertMessage("Game number" + data.game_id + "created");
-      } else {
-        console.error("Failed to create game:", data);
-      }
+      setGames((prevGames) => [...prevGames, data]);
+      setAlertMessage("Game number" + data.game_id + "created");
     } catch (error) {
-      console.error("Error:", error);
+      setAlertMessage("Error:", error);
     }
   };
 
-  const joinGame = async (game_name, gameId) => {
+  const joinGame = async (gameId) => {
     const response = await fetch(
       `http://localhost:8800/api/games/${gameId}/join`,
       {
@@ -302,9 +304,7 @@ function App() {
                 ) : (
                   games.map((game) => (
                     <li key={game.game_id}>
-                      <button
-                        onClick={() => joinGame(game.game_name, game.game_id)}
-                      >
+                      <button onClick={() => joinGame(game.game_id)}>
                         Enter Game {game.game_id}
                       </button>
                       <button onClick={() => deleteGame(game.game_id)}>
@@ -329,7 +329,7 @@ function App() {
           </h3>
           {selectedGameId && (
             <div>
-              <p>Game {selectedGameId}</p>
+              <p>{"Game " + selectedGameId}</p>
               <p>Playing as {isPlayerOne ? "O" : "X"}</p>
               <p role="latest move">{latestMove}</p>
               <div className="board">
