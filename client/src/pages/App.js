@@ -106,7 +106,10 @@ function App() {
   };
 
   useEffect(() => {
-    if (latestMove) {
+    if (
+      latestMove &&
+      latestMove != "check here for the latest move made in a game"
+    ) {
       setAlertMessage(latestMove);
     }
   }, [latestMove]);
@@ -286,9 +289,9 @@ function App() {
               <label id="gamesLabel">List of Available Games</label>
               <ul>
                 {games.length === 0 ? (
-                  <li>
+                  <p>
                     No games available, navigate backward to create a game
-                  </li>
+                  </p>
                 ) : (
                   games.map((game) => (
                     <li key={game.game_id}>
@@ -320,7 +323,7 @@ function App() {
               <p>{"Game " + selectedGameId}</p>
               <p>Playing as {isPlayerOne ? "circle" : "cross"}</p>
               <p role="latest move">{latestMove}</p>
-              {winner && <p>Winner: {winner}</p>}
+              {winner && <p>Winner: {winner == "O" ? "circle" : "cross"}</p>}
               <div className="board">
                 {board.map((cell, index) => (
                   <div key={index} className="cell">

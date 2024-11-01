@@ -327,3 +327,28 @@ app.get("/api/games", (req, res) => {
     res.json(games);
   });
 });
+
+// get moves for a given gameId
+app.get("/api/moves/:gameId", (req, res) => {
+  const gameId = req.params.gameId;
+  console.log(gameId);
+
+  const query = `SELECT move_id, player, position FROM moves WHERE game_id = ? ORDER BY move_id ASC`;
+
+  db.all(query, [gameId], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: "Database error" });
+    } else {
+      const moves = rows.map((row) => ({
+        player: row.player,
+        position: row.position,
+      }));
+      if (moves.length === 0) {
+        return res
+          .status(404)
+          .json({ error: "Game not found or no moves have been made" });
+      }
+      res.json(moves);
+    }
+  });
+});
