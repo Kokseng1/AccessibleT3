@@ -1,12 +1,12 @@
 ## About AccessibleT3, design decisions and accessibility considerations
 
-The AccessibleT3 project is built with React, Node.js, and SQLite, and is containerized with Docker for easy deployment. It is designed to create an inclusive, fully accessible experience for all players, especially those using screen readers. To ensure accessibility, I prioritized sequential readability, arranging all elements on a single page to simplify navigation for screen readers. There are 3 components, side bar for managing all games, main bar for playing the current game, and game history section to view past games. These components are neatly divided and documented for easier navigation. Key game actions—including setting player names, creating, deleting, or joining games, and making moves—are accompanied by alerts that screen readers announce, ensuring players receive timely feedback for each action. Error messages are also announced, guiding users through potential issues like invalid moves, attempts to access the board without joining a game, or incorrect confirmation inputs.
+The AccessibleT3 project is built with React, Node.js, and SQLite, and is containerized with Docker for easy deployment. AccessibleT3 is created with a primary focus on users who rely on screen readers, ensuring that every interaction and element within the app is accessible and easy to navigate for a seamless experience. To ensure accessibility, I prioritized sequential readability, arranging all elements on a single page to simplify navigation for screen readers. There are 3 components, Game Manager for managing all games, Game Player for playing the current game, and Game History Section to view past games. These components are neatly divided and documented for easier navigation. Key game actions—including setting player names, creating, deleting, or joining games, and making moves—are accompanied by alerts that screen readers announce, ensuring players receive timely feedback for each action. Error messages are also announced, guiding users through potential issues like invalid moves, attempts to access the board without joining a game, or incorrect confirmation inputs.
 
 The interface uses clear, descriptive text throughout to help players easily track game progress, while concise labels and straightforward design support efficient interaction. These accessibility-first design choices ensure a smooth, responsive experience, keeping AccessibleT3 inclusive and user-friendly for all players.
 
-## [List of Apis](https://www.postman.com/cryosat-saganist-18028673/fc263974-3b6b-455a-b86c-1c780628d8a2/request/jcsqgny/clearing-all-ended-game-history)
+## [Link to list of Apis](https://www.postman.com/cryosat-saganist-18028673/fc263974-3b6b-455a-b86c-1c780628d8a2/request/jcsqgny/clearing-all-ended-game-history)
 
-## [Walkthrough/testing video](https://drive.google.com/file/d/1IaAzo_Ez4bzg_10e7B22PURuYu8fTAuw/view?usp=sharing)
+## [Link to walkthrough/testing video](https://drive.google.com/file/d/1IaAzo_Ez4bzg_10e7B22PURuYu8fTAuw/view?usp=sharing)
 
 ## Architecture diagram
 

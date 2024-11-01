@@ -16,7 +16,6 @@ function App() {
   const [isPlayerOne, setIsPlayerOne] = useState(true);
   const [winner, setWinner] = useState(null);
   const [alertMessage, setAlertMessage] = useState("");
-  const [isPlayerTurn, setIsPlayerTurn] = useState(null);
   const [latestMove, setLatestMove] = useState(
     "check here for the latest move made in a game"
   );
@@ -60,7 +59,6 @@ function App() {
     const data = await response.json();
     if (data.winner) {
       setWinner(data.winner);
-      setIsPlayerTurn(false);
     }
     setBoard(data.board);
     if (data.latestMovePlayer != null && data.latestMovePosition != null) {
@@ -72,14 +70,6 @@ function App() {
           " placed in " +
           getRowCol(data.latestMovePosition)
       );
-    }
-    if (
-      (isPlayerOne && data.playerTurn == 1) ||
-      (!isPlayerOne && data.playerTurn == 2)
-    ) {
-      setIsPlayerTurn(true);
-    } else {
-      setIsPlayerTurn(false);
     }
   };
 
@@ -237,7 +227,6 @@ function App() {
   const quitCurrentSession = async () => {
     setSelectedGameId(null);
     setBoard(Array(9).fill(null));
-    setIsPlayerTurn(false);
     setWinner(null);
     setLatestMove("check here for the latest move made in a game");
     setAlertMessage(
@@ -350,8 +339,8 @@ function App() {
 
           {!selectedGameId && (
             <p role="prompt to start a game">
-              You are not in a game currently, join a game using the sidebar to
-              start playing
+              You are not in a game currently, join a game using the Game
+              Manager to start playing
             </p>
           )}
         </div>
