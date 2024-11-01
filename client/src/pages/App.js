@@ -258,7 +258,7 @@ function App() {
       <h1>Inclusive Tic Tac Toe</h1>
       <p>
         This application consists of 3 main components : Game manager, Game
-        player, and game history manager
+        player, and game history section
       </p>
       <div className="container">
         <div className="sidebar">

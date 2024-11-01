@@ -8,7 +8,7 @@ The interface uses clear, descriptive text throughout to help players easily tra
 
 ## Architecture diagram
 
-![Architecture Diagram](./ArchitectureDiagram.png)
+![Architecture Diagram](./images/ArchitectureDiagram.png)
 
 # Set Up Guide for AccessibleT3
 
@@ -76,7 +76,4 @@ Before you begin, ensure you have the following software installed on your devic
 
 1. Open your web browser and navigate to:
    </br> `http://localhost:3000`
-2. You can interact with the game as a player. To test multiplayer functionality:
-
-- Open multiple tabs in the same browser.
-- Alternatively, use different browsers (like Chrome and Firefox) or incognito/private mode in your browser to simulate multiple players.
+2. Use different browsers (like Chrome and Firefox) or incognito/private mode in your browser to simulate multiple players to test multiplayer functionality:

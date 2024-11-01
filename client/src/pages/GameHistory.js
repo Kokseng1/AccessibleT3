@@ -100,7 +100,7 @@ const GameHistory = () => {
 
   return (
     <div>
-      <h1 id="history-title">Game History Manager</h1>
+      <h1 id="history-title">Game History Section</h1>
       <input
         type="text"
         value={searchTerm}
