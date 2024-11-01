@@ -27,19 +27,35 @@ app.post("/api/games", (req, res) => {
 // delete game
 app.delete("/api/games/:id", (req, res) => {
   const { id } = req.params;
+  db.serialize(() => {
+    db.run("BEGIN TRANSACTION");
 
-  const query = `DELETE FROM Games WHERE game_id = ?`;
-  db.run(query, [id], function (err) {
-    if (err) {
-      console.error("Error deleting game:", err.message);
-      return res.status(500).json({ error: "Failed to delete game" });
-    }
+    const deleteGameQuery = `DELETE FROM Games WHERE game_id = ?`;
+    const deleteMovesQuery = `DELETE FROM Moves WHERE game_id = ?`;
 
-    if (this.changes === 0) {
-      return res.status(404).json({ error: "Game not found" });
-    }
+    db.run(deleteGameQuery, [id], function (err) {
+      if (err) {
+        console.error("Error deleting game:", err.message);
+        db.run("ROLLBACK");
+        return res.status(500).json({ error: "Failed to delete game" });
+      }
 
-    res.status(204).send();
+      if (this.changes === 0) {
+        db.run("ROLLBACK");
+        return res.status(404).json({ error: "Game not found" });
+      }
+
+      // Delete moves
+      db.run(deleteMovesQuery, [id], function (err) {
+        if (err) {
+          console.error("Error deleting moves:", err.message);
+          db.run("ROLLBACK");
+          return res.status(500).json({ error: "Failed to delete game moves" });
+        }
+        db.run("COMMIT");
+        res.status(204).send();
+      });
+    });
   });
 });
 
