@@ -6,6 +6,8 @@ The interface uses clear, descriptive text throughout to help players easily tra
 
 ## [List of Apis](https://www.postman.com/cryosat-saganist-18028673/fc263974-3b6b-455a-b86c-1c780628d8a2/request/jcsqgny/clearing-all-ended-game-history)
 
+## [Walkthrough/testing video](https://drive.google.com/file/d/1IaAzo_Ez4bzg_10e7B22PURuYu8fTAuw/view?usp=sharing)
+
 ## Architecture diagram
 
 ![Architecture Diagram](./images/ArchitectureDiagram.png)
