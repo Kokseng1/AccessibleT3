@@ -56,6 +56,10 @@ h1 {
   text-align: center;
 }
 
+h3 {
+  margin-top: 4px;
+}
+
 h1::after {
   top: 50px;
 }

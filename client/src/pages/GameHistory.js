@@ -105,7 +105,7 @@ const GameHistory = () => {
         type="text"
         value={searchTerm}
         onChange={handleSearchChange}
-        placeholder="Search by player name"
+        placeholder="Filter by player name"
       />
 
       {/* clear history */}

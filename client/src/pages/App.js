@@ -256,11 +256,14 @@ function App() {
       <div></div>
 
       <h1>Inclusive Tic Tac Toe</h1>
+      <p>
+        This application consists of 3 main components : Game manager, Game
+        player, and game history manager
+      </p>
       <div className="container">
         <div className="sidebar">
           <h3 className="informationSection" role="Information Section">
-            side bar, navigate this section vertically to create, join and quit
-            games
+            Game manager, use this section to create, join and quit games
           </h3>
           {!playerId && (
             <div>
@@ -289,9 +292,7 @@ function App() {
               <label id="gamesLabel">List of Available Games</label>
               <ul>
                 {games.length === 0 ? (
-                  <p>
-                    No games available, navigate backward to create a game
-                  </p>
+                  <p>No games available, navigate backward to create a game</p>
                 ) : (
                   games.map((game) => (
                     <li key={game.game_id}>
@@ -316,14 +317,17 @@ function App() {
         </div>
         <div className="mainbar">
           <h3 className="informationSection">
-            mainbar, use the grid below to keep track of your current game
+            Game player, use this section to keep track of your current game
           </h3>
           {selectedGameId && (
             <div>
               <p>{"Game " + selectedGameId}</p>
               <p>Playing as {isPlayerOne ? "circle" : "cross"}</p>
               <p role="latest move">{latestMove}</p>
-              {winner && <p>Winner: {winner == "O" ? "circle" : "cross"}</p>}
+              {winner && (
+                <p>Winner: {winner == "O" ? "circle" : "cross"}</p>
+              )}{" "}
+              <p>Make moves using the board below</p>
               <div className="board">
                 {board.map((cell, index) => (
                   <div key={index} className="cell">
