@@ -140,7 +140,7 @@ function App() {
 
       const data = await response.json();
       if (!response.ok) {
-        setAlertMessage(data);
+        setAlertMessage(data.error);
       }
 
       var newwinner = data.winner;
